@@ -22,14 +22,5 @@
  // terminal server directory mongod npm install npm start  // terminal client directory npm install npm run serve  Visit localhost:3000 and you should see &amp;ldquo;hello world&amp;rdquo;.</description>
     </item>
     
-    <item>
-      <title></title>
-      <link>https://jordandavidson1990.github.io/post/authenicate_start_code/server/public/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://jordandavidson1990.github.io/post/authenicate_start_code/server/public/</guid>
-      <description> favicon.ico&#34; authenicate_2    We&#39;re sorry but authenicate_2 doesn&#39;t work properly without JavaScript enabled. Please enable it to continue.     </description>
-    </item>
-    
   </channel>
 </rss>
