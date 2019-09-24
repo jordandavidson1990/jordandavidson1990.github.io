@@ -97,20 +97,18 @@ app.use(bodyParser.urlencoded({extended:false}))
 
 <p>Next we will go back to the frontend and install Axios to call and send data back to the backend.</p>
 
-<pre><code class="language-npm">
-And we can include it in our signup.vue
-
+<pre><code>npm install axios
 </code></pre>
 
-<p>// signup.vue
-import axios from &lsquo;axios&rsquo;</p>
+<p>And we can include it in our signup.vue</p>
 
-<pre><code>
-And modify the method to create a new user
-
+<pre><code>// signup.vue
+import axios from 'axios'
 </code></pre>
 
-<p>methods: {
+<p>And modify the method to create a new user</p>
+
+<pre><code>methods: {
     signup: function(){
       let newUser = {
         name: this.name,
@@ -118,267 +116,294 @@ And modify the method to create a new user
         password: this.password
       }
     }
-  }</p>
+  }
+</code></pre>
 
-<pre><code>## Axios
-Axios is a promise based HTTP request library which allows us to interface with REST APIs.
+<h2 id="axios">Axios</h2>
 
-### Axios v Fetch
+<p>Axios is a promise based HTTP request library which allows us to interface with REST APIs.</p>
 
-* Fetch's body = Axios' data
-* Fetch's body has to be stringified, Axios' data contains the object
-* Fetch has no url in request object, Axios has url in request object
-* Fetch request function includes the url as parameter, Axios request function does not include the url as parameter.
-* Fetch request is ok when response object contains the ok property, Axios request is ok when status is 200 and statusText is 'OK'
-* To get the json object response: in fetch call the json() function on the response object, in Axios get data property of the response object.
+<h3 id="axios-v-fetch">Axios v Fetch</h3>
 
-We will now use axios to send the data to the backend. Post requires the URL as the first parameter and data to be passed as the second.
+<ul>
+<li>Fetch&rsquo;s body = Axios&rsquo; data</li>
+<li>Fetch&rsquo;s body has to be stringified, Axios&rsquo; data contains the object</li>
+<li>Fetch has no url in request object, Axios has url in request object</li>
+<li>Fetch request function includes the url as parameter, Axios request function does not include the url as parameter.</li>
+<li>Fetch request is ok when response object contains the ok property, Axios request is ok when status is 200 and statusText is &lsquo;OK&rsquo;</li>
+<li>To get the json object response: in fetch call the json() function on the response object, in Axios get data property of the response object.</li>
+</ul>
+
+<p>We will now use axios to send the data to the backend. Post requires the URL as the first parameter and data to be passed as the second.</p>
+
+<pre><code>axios.post('http://localhost:3000/signup', newUser)
+</code></pre>
+
+<p>Lets check if the data is sent to the backend.</p>
+
+<pre><code>// server.js
+app.post('/signup', (req, res) =&gt;{
+  console.log(req.body) &lt;!--added--&gt;
+})
 
 </code></pre>
 
-<p>axios.post(&lsquo;<a href="http://localhost:3000/signup'">http://localhost:3000/signup'</a>, newUser)</p>
+<p>Doing this alone with run into a cors issue. Let us resolve this now by</p>
 
-<pre><code>Lets check if the data is sent to the backend.
-
+<pre><code class="language-npm">
 </code></pre>
 
 <p>// server.js
-app.post(&lsquo;/signup&rsquo;, (req, res) =&gt;{
-  console.log(req.body) <!--added-->
-})</p>
+const cors = require(&lsquo;cors&rsquo;)
+app.use(cors())</p>
 
 <pre><code>
-Doing this alone with run into a cors issue. Let us resolve this now by
+When submitting form you should now see the data on the displayed in your terminal screen.
+
+### Mongoose
+
+Now that we can access our front end data and send it to the backend lets look into creating our mongoose model.
+
+In terms of Node.js, mongodb is the native driver for interacting with a mongodb instance and mongoose is an Object modeling tool for MongoDB. Using Mongoose, a user can define the schema for the documents in a particular collection. It provides a lot of convenience in the creation and management of data in MongoDB.
+
 </code></pre>
 
-<p>npm install cors```</p>
-
-<pre><code>// server.js
-const cors = require('cors')
-app.use(cors())
-</code></pre>
-
-<p>When submitting form you should now see the data on the displayed in your terminal screen.</p>
-
-<h3 id="mongoose">Mongoose</h3>
-
-<p>Now that we can access our front end data and send it to the backend lets look into creating our mongoose model.</p>
-
-<p>In terms of Node.js, mongodb is the native driver for interacting with a mongodb instance and mongoose is an Object modeling tool for MongoDB. Using Mongoose, a user can define the schema for the documents in a particular collection. It provides a lot of convenience in the creation and management of data in MongoDB.</p>
-
-<pre><code>terminal - server folder
+<p>terminal - server folder
 npm install mongoose
 mkdir models
-touch models/User.js
+touch models/User.js</p>
+
+<pre><code>
+First we will grab mongoose by requiring it in and creating our Schema. We will set the email to unique so that only one account can have one email.
+
 </code></pre>
 
-<p>First we will grab mongoose by requiring it in and creating our Schema. We will set the email to unique so that only one account can have one email.</p>
+<p>// User.js
+const mongoose = require(&lsquo;mongoose&rsquo;)
+const Schema = mongoose.Schema;</p>
 
-<pre><code>// User.js
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema;
-
-const userSchema = new Schema ({
+<p>const userSchema = new Schema ({
   name: String,
   email: {
     unique: true,
     type: String
     },
   password: String
-})
+})</p>
+
+<pre><code>Mongoose's inbuild validators are when we add a criteria to the data we want to persist. Another example is `required: true`, `minLength: 2`, `maxLength: 6`, `enums`.
+We can also make custom validators by adding logic.
+
+Then we will set a collection for where this schema will be sent to.
+
 </code></pre>
 
-<p>Mongoose&rsquo;s inbuild validators are when we add a criteria to the data we want to persist. Another example is <code>required: true</code>, <code>minLength: 2</code>, <code>maxLength: 6</code>, <code>enums</code>.
-We can also make custom validators by adding logic.</p>
+<p>const User = mongoose.model(&lsquo;User&rsquo;, userSchema)</p>
 
-<p>Then we will set a collection for where this schema will be sent to.</p>
+<p>module.exports = User</p>
 
-<pre><code>const User = mongoose.model('User', userSchema)
+<pre><code>
+Then require the User into the server.js
 
-module.exports = User
 </code></pre>
 
-<p>Then require the User into the server.js</p>
+<p>// server.js
+const User = require(&lsquo;./models/User&rsquo;)</p>
 
-<pre><code>// server.js
-const User = require('./models/User')
+<pre><code>
 </code></pre>
 
-<pre><code>app.post('/signup', (req,res) =&gt;{
+<p>app.post(&lsquo;/signup&rsquo;, (req,res) =&gt;{
   let newUser = new User({
     email: req.body.email
     name: req.body.name
   })
-})
+})</p>
+
+<pre><code>We will decrypt our password by using bcrypt.
+
+`npm i bcrypt`
+
 </code></pre>
 
-<p>We will decrypt our password by using bcrypt.</p>
+<p>// server.js
+const bcrypt = require(&lsquo;bcrypt&rsquo;)</p>
 
-<p><code>npm i bcrypt</code></p>
+<pre><code>
+Then we should use bcrypt when storing our password
 
-<pre><code>// server.js
-const bcrypt = require('bcrypt')
 </code></pre>
 
-<p>Then we should use bcrypt when storing our password</p>
-
-<pre><code>app.post('/signup', (req,res) =&gt;{
+<p>app.post(&lsquo;/signup&rsquo;, (req,res) =&gt;{
   let newUser = new User({
     email: req.body.email
     name: req.body.name
-    password: bcrypt.hashSync(req.body.password, 10)&lt;!--added--&gt;
+    password: bcrypt.hashSync(req.body.password, 10)<!--added-->
   })
-  console.log(newUser) &lt;!--added--&gt;
-})
+  console.log(newUser) <!--added-->
+})</p>
+
+<pre><code>We should have our schema model in the terminal. You may have to restart server to get the password to decrypt.
+
+Lets start mongod
+
 </code></pre>
 
-<p>We should have our schema model in the terminal. You may have to restart server to get the password to decrypt.</p>
+<p>// terminal
+mongod</p>
 
-<p>Lets start mongod</p>
+<pre><code>After that we should point our mongoose to our localhost.
 
-<pre><code>// terminal
-mongod
 </code></pre>
 
-<p>After that we should point our mongoose to our localhost.</p>
+<p>// server.js
+const mongoose = require(&lsquo;mongoose&rsquo;)
+mongoose.connect(&lsquo;mongodb://localhost:27017/signups&rsquo;)</p>
 
-<pre><code>// server.js
-const mongoose = require('mongoose')
-mongoose.connect('mongodb://localhost:27017/signups')
+<pre><code>
+We will now save the new user to the database. First we will set up if there are any errors.
+
 </code></pre>
 
-<p>We will now save the new user to the database. First we will set up if there are any errors.</p>
-
-<pre><code>// server.js
-app.post('/signup', (req,res) =&gt;{
+<p>// server.js
+app.post(&lsquo;/signup&rsquo;, (req,res) =&gt;{
   let newUser = new User({
     email: req.body.email,
     name: req.body.name,
     password: bcrypt.hashSync(req.body.password, 10)
   })
-  newUser.save(err =&gt; { &lt;!--modified--&gt;
-	  if(err){
-	    return res.status(400).json({
-	      title:'error',
-	      error:'email in use'
+  newUser.save(err =&gt; { <!--modified-->
+      if(err){
+        return res.status(400).json({
+          title:&lsquo;error&rsquo;,
+          error:&lsquo;email in use&rsquo;
     })
   })
-})
+})</p>
+
+<pre><code>This would be a status of 400 Bad Request
+This response means that server could not understand the request due to invalid syntax. Most likely caused by user entering an email that is already in use.
+
+If there is no error lets return a successful status of 200.
 
 </code></pre>
 
-<p>This would be a status of 400 Bad Request
-This response means that server could not understand the request due to invalid syntax. Most likely caused by user entering an email that is already in use.</p>
-
-<p>If there is no error lets return a successful status of 200.</p>
-
-<pre><code>// server.js
+<p>// server.js
   newUser.save(err =&gt; {
     if(err){
       return res.status(400).json({
-        title:'error',
-        error:'email in use'
+        title:&lsquo;error&rsquo;,
+        error:&lsquo;email in use&rsquo;
       })
     }
-    return res.status(200).json({ &lt;!--added--&gt;
-      title:'signup success'
+    return res.status(200).json({ <!--added-->
+      title:&lsquo;signup success&rsquo;
     })
   })
-})
+})</p>
+
+<pre><code>
+When we try to add multiple names with the same email we should get an error in our console. We should also check MongoDB Compass we should see our new user.
+
+In order to get some feedback from when we add the user.
+
 </code></pre>
 
-<p>When we try to add multiple names with the same email we should get an error in our console. We should also check MongoDB Compass we should see our new user.</p>
-
-<p>In order to get some feedback from when we add the user.</p>
-
-<pre><code>// signup.vue
-axios.post('http://localhost:3000/signup', newUser)
-        .then(res =&gt; { 			&lt;!--added--&gt;
+<p>// signup.vue
+axios.post(&lsquo;<a href="http://localhost:3000/signup'">http://localhost:3000/signup'</a>, newUser)
+        .then(res =&gt; {          <!--added-->
           console.log(res);
         }, err =&gt; {
           console.log(err.response);
-        })
+        })</p>
+
+<pre><code>Lets test this out by adding a new user and you should receive some feedback from the console saying it has been successful. Clicking again with the same email should flag an error saying email is in use.
+
+## Login
+
+In client directory
 </code></pre>
 
-<p>Lets test this out by adding a new user and you should receive some feedback from the console saying it has been successful. Clicking again with the same email should flag an error saying email is in use.</p>
+<p>npm install vue-router</p>
 
-<h2 id="login">Login</h2>
-
-<p>In client directory</p>
-
-<pre><code>npm install vue-router
+<pre><code>
 </code></pre>
 
-<pre><code>touch src/router.js
+<p>touch src/router.js</p>
+
+<pre><code>
 </code></pre>
 
-<pre><code>// router.js
-import Vue from 'vue';
-import Router from 'vue-router';
-import Home from './components/home';
-import Login from './components/login';
-import Signup from './components/signup';
+<p>// router.js
+import Vue from &lsquo;vue&rsquo;;
+import Router from &lsquo;vue-router&rsquo;;
+import Home from &lsquo;./components/home&rsquo;;
+import Login from &lsquo;./components/login&rsquo;;
+import Signup from &lsquo;./components/signup&rsquo;;</p>
 
-Vue.use(Router);
+<p>Vue.use(Router);</p>
 
-export default new Router({
+<p>export default new Router({
   routes:[
     {
-      path:'/',
-      name:'home',
+      path:&lsquo;/&rsquo;,
+      name:&lsquo;home&rsquo;,
       component: Home
     },
     {
-      path:'/login',
-      name:'login',
+      path:&lsquo;/login&rsquo;,
+      name:&lsquo;login&rsquo;,
       component:Login
     },
     {
-      path:'/signup',
-      name:'signup',
+      path:&lsquo;/signup&rsquo;,
+      name:&lsquo;signup&rsquo;,
       component:Signup
     }
   ]
-})
+})</p>
 
-</code></pre>
+<pre><code></code></pre>
 
-<pre><code>// main.js
-import Vue from 'vue';
-import App from './App.vue';
-import router from './router'; &lt;!--added--&gt;
+<p>// main.js
+import Vue from &lsquo;vue&rsquo;;
+import App from &lsquo;./App.vue&rsquo;;
+import router from &lsquo;./router&rsquo;; <!--added--></p>
 
-Vue.config.productionTip = false
+<p>Vue.config.productionTip = false</p>
 
-new Vue({
-  router, &lt;!--added--&gt;
+<p>new Vue({
+  router, <!--added-->
   render: h =&gt; h(App),
-}).$mount('#app')
+}).$mount(&lsquo;#app&rsquo;)</p>
+
+<pre><code>
+And change our app.js
 
 </code></pre>
 
-<p>And change our app.js</p>
+<p>// app.js
+<template>
+  <div id="app">
+    <router-view/>      <!--modified-->
+  </div>
+</template></p>
 
-<pre><code>// app.js
-&lt;template&gt;
-  &lt;div id=&quot;app&quot;&gt;
-    &lt;router-view/&gt;		&lt;!--modified--&gt;
-  &lt;/div&gt;
-&lt;/template&gt;
+<pre><code>
+Lets set up our login page.
+
 </code></pre>
 
-<p>Lets set up our login page.</p>
+<p>// login.vue
+<template lang="html">
+  <div>
+    Email: <input type="text" v-model="email">
+    Password: <input type="text" v-model="password">
+    <button>Login</button>
+  </div>
+</template></p>
 
-<pre><code>// login.vue
-&lt;template lang=&quot;html&quot;&gt;
-  &lt;div&gt;
-    Email: &lt;input type=&quot;text&quot; v-model=&quot;email&quot;&gt;
-    Password: &lt;input type=&quot;text&quot; v-model=&quot;password&quot;&gt;
-    &lt;button&gt;Login&lt;/button&gt;
-  &lt;/div&gt;
-&lt;/template&gt;
-
-&lt;script&gt;
+<script>
 export default {
   name:'login',
   data(){
@@ -388,28 +413,30 @@ export default {
     }
   }
 }
-&lt;/script&gt;
+</script>
 
-&lt;style lang=&quot;css&quot; scoped&gt;
+<style lang="css" scoped>
 input{
   display: block;
   margin:auto
 }
-&lt;/style&gt;
-</code></pre>
+</style>
+```
 
-<p>We would like to connect to the backend. For which we will use axios.</p>
+We would like to connect to the backend. For which we will use axios.
 
-<pre><code>// login.vue
+```
+// login.vue
 import axios from 'axios'
-</code></pre>
+```
+Lets make the click button call a function
 
-<p>Lets make the click button call a function</p>
+```
+<button @click="login">Login </button> <!--modified-->
+```
 
-<pre><code>&lt;button @click=&quot;login&quot;&gt;Login &lt;/button&gt; &lt;!--modified--&gt;
-</code></pre>
-
-<pre><code>// login.vue
+```
+// login.vue
 methods:{
     login: function(){
       let user = {
@@ -417,27 +444,28 @@ methods:{
         password: this.password
       }
       axios.post('http://localhost:3000/login', user)
-        .then(res =&gt; {
+        .then(res => {
           console.log(res);
         })
     }
   }
-</code></pre>
+```
 
-<p>We will send it to the backend and check that we are receiving the data.</p>
+We will send it to the backend and check that we are receiving the data.
 
-<pre><code>app.post('/login', (req, res) =&gt; {
+```
+app.post('/login', (req, res) => {
   console.log(req.body);
 })
-</code></pre>
+```
+After attempting to login we should see our email and password in our terminal.
 
-<p>After attempting to login we should see our email and password in our terminal.</p>
+We should then use the mongoose function findOne. Since all of our emails are set up to be unique there should only be one. We will also flag up an error if an email in not found on the front end.
 
-<p>We should then use the mongoose function findOne. Since all of our emails are set up to be unique there should only be one. We will also flag up an error if an email in not found on the front end.</p>
-
-<pre><code>// server.js
-app.post('/login', (req, res) =&gt; {
-  User.findOne({ email: req.body.email }, (err, user) =&gt; {
+```
+// server.js
+app.post('/login', (req, res) => {
+  User.findOne({ email: req.body.email }, (err, user) => {
     if (err) return res.status(500).json({
       title: 'server error',
       error: err
@@ -448,47 +476,47 @@ app.post('/login', (req, res) =&gt; {
     })
   })
 })
-</code></pre>
+```
 
-<p>We will use bcrypt.compareSync method which takes only 2 arguments and returns a boolean value true or false. We will flag up if the password is incorrect.</p>
+We will use bcrypt.compareSync method which takes only 2 arguments and returns a boolean value true or false. We will flag up if the password is incorrect.
 
-<pre><code>// server.js
+```
+// server.js
 if(!user) return res.status(401).json({
       title: 'user not found',
       error: 'invalid creditentials'
     })
-    // incorrect Password &lt;!--added--&gt;
+    // incorrect Password <!--added-->
     if(!bcrypt.compareSync(req.body.password, user.password)){
       return res.status(401).json({
         title: 'login failed',
         error: 'invalid creditentials'
       })
     }
-</code></pre>
+```
 
-<p>And then only if everything is all good, we will use json web token to verify the user and the credentials. We will send a token back to the frontend for the user to use that token.</p>
+And then only if everything is all good, we will use json web token to verify the user and the credentials. We will send a token back to the frontend for the user to use that token.
 
-<p><code>npm install jsonwebtoken</code></p>
+` npm install jsonwebtoken`
 
-<p>We could also add some visual feedback to incorporate the error messages we have flagged up in our backend by adding them to our signup.vue</p>
+We could also add some visual feedback to incorporate the error messages we have flagged up in our backend by adding them to our signup.vue
 
-<blockquote>
-<p>show the error when trying to sign up for same email address and route that it takes to get to error message. Should be err.response.data.title</p>
-</blockquote>
+> show the error when trying to sign up for same email address and route that it takes to get to error message. Should be err.response.data.title
 
-<pre><code>// signup.vue
-&lt;template lang=&quot;html&quot;&gt;
-  &lt;div&gt;
-    &lt;h1&gt;Signup&lt;/h1&gt;
-    Name: &lt;input type=&quot;text&quot; v-model=&quot;name&quot; /&gt;
-    Email: &lt;input type=&quot;text&quot; v-model=&quot;email&quot; /&gt;
-    Password: &lt;input type=&quot;password&quot; v-model=&quot;password&quot; /&gt;
-    &lt;button @click=&quot;signup&quot;&gt;Sign up&lt;/button&gt;
-    {{ error }} &lt;!--added--&gt;
-  &lt;/div&gt;
-&lt;/template&gt;
+```
+// signup.vue
+<template lang="html">
+  <div>
+    <h1>Signup</h1>
+    Name: <input type="text" v-model="name" />
+    Email: <input type="text" v-model="email" />
+    Password: <input type="password" v-model="password" />
+    <button @click="signup">Sign up</button>
+    {{ error }} <!--added-->
+  </div>
+</template>
 
-&lt;script&gt;
+<script>
 import axios from 'axios'
 export default {
   name: 'signup',
@@ -497,7 +525,7 @@ export default {
       name:'',
       email:'',
       password:'',
-      error:'' &lt;!--added--&gt;
+      error:'' <!--added-->
     }
   },
   methods: {
@@ -508,42 +536,43 @@ export default {
         password: this.password
       }
       axios.post('http://localhost:3000/signup', newUser)
-        .then(res =&gt; {
+        .then(res => {
           console.log(res);
-          this.error = '' &lt;!--added--&gt;
-        }, err =&gt; {
+          this.error = '' <!--added-->
+        }, err => {
           console.log(err.response);
-          this.error = err.response.data.error &lt;!--added--&gt;
+          this.error = err.response.data.error <!--added-->
         })
     }
   }
 }
-&lt;/script&gt;
-</code></pre>
+</script>
+```
+We can also push this user towards the login page as we know they have signed up successfully.
 
-<p>We can also push this user towards the login page as we know they have signed up successfully.</p>
-
-<pre><code>axios.post('http://localhost:3000/signup', newUser)
-        .then(res =&gt; {
+```
+axios.post('http://localhost:3000/signup', newUser)
+        .then(res => {
           console.log(res);
-          this.$router.push('/login') &lt;!--added--&gt;
-</code></pre>
+          this.$router.push('/login') <!--added-->
+```
 
-<p>If we check with our mongodb compass we should have a new user.</p>
+If we check with our mongodb compass we should have a new user.
 
-<p>Lets now give some feedback to the login for wrong password.</p>
+Lets now give some feedback to the login for wrong password.
 
-<pre><code>// login.vue
-&lt;template lang=&quot;html&quot;&gt;
-  &lt;div&gt;
-    Email: &lt;input type=&quot;text&quot; v-model=&quot;email&quot;&gt;
-    Password: &lt;input type=&quot;password&quot; v-model=&quot;password&quot;&gt;
-    &lt;button @click=&quot;login&quot;&gt;Login&lt;/button&gt;
-    {{ error }}			&lt;!--added--&gt;
-  &lt;/div&gt;
-&lt;/template&gt;
+```
+// login.vue
+<template lang="html">
+  <div>
+    Email: <input type="text" v-model="email">
+    Password: <input type="password" v-model="password">
+    <button @click="login">Login</button>
+    {{ error }}         <!--added-->
+  </div>
+</template>
 
-&lt;script&gt;
+<script>
 import axios from 'axios';
 
 export default {
@@ -552,7 +581,7 @@ export default {
     return{
       email:'',
       password:'',
-      error: '' 			&lt;!--added--&gt;
+      error: ''             <!--added-->
     }
   },
   methods:{
@@ -562,97 +591,104 @@ export default {
         password: this.password
       }
       axios.post('http://localhost:3000/login', user)
-        .then(res =&gt; {
+        .then(res => {
           console.log(res);
-        }, err =&gt; { 					&lt;!--added--&gt;
-          console.log(err.response);		&lt;!--added--&gt;
-          this.error = err.response.data.error &lt;!--added--&gt;
+        }, err => {                     <!--added-->
+          console.log(err.response);        <!--added-->
+          this.error = err.response.data.error <!--added-->
         })
     }
   }
 }
-&lt;/script&gt;
-</code></pre>
+</script>
+```
 
-<p>Now lets go back to the backend and if successful send a token to the frontend.</p>
+Now lets go back to the backend and if successful send a token to the frontend.
 
-<pre><code>// server.js
+```
+// server.js
 const jwt = require('jsonwebtoken')
-</code></pre>
+```
 
-<p>In order to generate a web token we use the function .sign(). In the first parameter include a payload and the second parameter include a secret key. We will send the <code>userId: user_id</code> as we know by logging out the user we get a <code>_id</code>. And we will create a global variable of random letters which can&rsquo;t be hacked. Then we will send this json back to the frontend.</p>
+In order to generate a web token we use the function .sign(). In the first parameter include a payload and the second parameter include a secret key. We will send the `userId: user_id` as we know by logging out the user we get a `_id`. And we will create a global variable of random letters which can't be hacked. Then we will send this json back to the frontend.
 
-<pre><code>// server.js
+```
+// server.js
     let token = jwt.sign({ userId: user._id }, secretkey)
     return res.status(200).json({
       title: 'login successful',
       token: token
 })
-</code></pre>
+```
+Create a global variable above the function
 
-<p>Create a global variable above the function</p>
+```
+const secrettoken = 'hfdsahgjkhfvsdaljgdisajg23452asgasg'
+```
 
-<pre><code>const secrettoken = 'hfdsahgjkhfvsdaljgdisajg23452asgasg'
-</code></pre>
+Now lets go back to the frontend and log out our response and it should give us a token.
 
-<p>Now lets go back to the frontend and log out our response and it should give us a token.</p>
-
-<pre><code>// login.vue
+```
+// login.vue
 axios.post('http://localhost:3000/login', user)
-        .then(res =&gt; {
-          if (res.status === 200){ &lt;!--added--&gt;
+        .then(res => {
+          if (res.status === 200){ <!--added-->
           console.log(res)}
-        }, err =&gt; {
+        }, err => {
           console.log(err.response);
           this.error = err.response.data.error
         })
     }
-</code></pre>
+```
 
-<p>If we attempt to login in with a registered email and password we should see in our console that we have now have a token.</p>
+If we attempt to login in with a registered email and password we should see in our console that we have now have a token.
 
-<pre><code>data:
-title: &quot;login successful&quot;
-token: &quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1ZDUyN2&quot;
-</code></pre>
+```
+data:
+title: "login successful"
+token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1ZDUyN2"
+```
 
-<p>Now that we have our token we will store it in our local storage and then push them to our home page.</p>
+Now that we have our token we will store it in our local storage and then push them to our home page.
 
-<pre><code>//login.vue
+```
+//login.vue
 axios.post('http://localhost:3000/login', user)
-        .then(res =&gt; {
+        .then(res => {
           if (res.status === 200){
-          localStorage.setItem('token', res.data.token) &lt;!--modified--&gt;
+          localStorage.setItem('token', res.data.token) <!--modified-->
           this.$router.push('/')
           }
-</code></pre>
+```
 
-<p>This will redirect us to the loading page. Which we will add in some conditional logic to check if the user has been authorised (includes a token in local storage).</p>
+This will redirect us to the loading page. Which we will add in some conditional logic to check if the user has been authorised (includes a token in local storage).
 
-<pre><code>// home.vue
-&lt;script&gt;
+```
+// home.vue
+<script>
 export default {
   name:'home',
-  created(){ 			&lt;!--added --&gt;
+  created(){            <!--added -->
     if(localStorage.getItem('token') === null){
       this.$router.push('/login')
     }
   }
 }
-&lt;/script&gt;
-</code></pre>
+</script>
+```
 
-<p>Now let us add a logout button to the home page. All we need to do is clear our localStorage.</p>
+Now let us add a logout button to the home page. All we need to do is clear our localStorage.
 
-<pre><code>// home.vue
-&lt;template lang=&quot;html&quot;&gt;
-&lt;div&gt;
+```
+// home.vue
+<template lang="html">
+<div>
   Home
-  &lt;button @click=&quot;logout&quot;&gt;Logout&lt;/button&gt; &lt;!--added--&gt;
-&lt;/div&gt;
-&lt;/template&gt;
+  <button @click="logout">Logout</button> <!--added-->
+</div>
+</template>
 
-&lt;script&gt;
+<script>
 export default {
   name:'home',
   created(){
@@ -660,40 +696,41 @@ export default {
       this.$router.push('/login')
     }
   },
-  methods:{	&lt;!--added--&gt;
+  methods:{ <!--added-->
     logout: function(){
       localStorage.clear();
       this.$router.push('/login')
     }
   }
 }
-&lt;/script&gt;
-</code></pre>
+</script>
+```
 
-<h2 id="user-details">User Details</h2>
+## User Details
 
-<p>Since we know the user is logged in we can personallise the page using the details acquired. We will send the token through the header.</p>
+Since we know the user is logged in we can personallise the page using the details acquired. We will send the token through the header.
 
-<pre><code>// home.vue
+```
+// home.vue
 mounted(){
     axios.get('http://localhost:3000/user', {
       headers: {
         token: localStorage.getItem('token')
       }
-    }).then(res =&gt; {
+    }).then(res => {
       console.log(res);
     })
   },
-</code></pre>
+```
+This will flag up a 404 as we have yet to create this route. Lets do this now in the backend.
 
-<p>This will flag up a 404 as we have yet to create this route. Lets do this now in the backend.</p>
+We will use jwt.verify() which takes two parameters, first is a token, second is our secret key. We will also provide an error response which we will provide a decoded response.
 
-<p>We will use jwt.verify() which takes two parameters, first is a token, second is our secret key. We will also provide an error response which we will provide a decoded response.</p>
-
-<pre><code>// server.js
-app.get('/user', (req, res) =&gt; {
+```
+// server.js
+app.get('/user', (req, res) => {
   let token = req.headers.token;
-  jwt.verify(token, secretkey, (err, decoded) =&gt; {
+  jwt.verify(token, secretkey, (err, decoded) => {
     if(err) return res.status(401).json({
       title: 'unauthorised'
     })
@@ -701,39 +738,40 @@ app.get('/user', (req, res) =&gt; {
   })
 })
 
-</code></pre>
+```
+There should only be a decoded userId if the user exists in the system.
 
-<p>There should only be a decoded userId if the user exists in the system.</p>
-
-<pre><code>// server.js
-app.get('/user', (req, res) =&gt; {
+```
+// server.js
+app.get('/user', (req, res) => {
   let token = req.headers.token;
-  jwt.verify(token, secretkey, (err, decoded) =&gt; {
+  jwt.verify(token, secretkey, (err, decoded) => {
     if(err) return res.status(401).json({
       title: 'unauthorised'
     })
-    User.findOne({ _id: decoded.userId }, ( err, user ) =&gt; { &lt;!--modified--&gt;
+    User.findOne({ _id: decoded.userId }, ( err, user ) => { <!--modified-->
       if (err) return console.log(err);
       console.log(user);
     })
   })
 })
-</code></pre>
+```
 
-<p>This should then log out the user details to the console. Since we can now log all of the data we can send all of the data to the frontend. Incidently we will not send back the whole object of user since we don&rsquo;t want to send our password so will only send email and name.</p>
+This should then log out the user details to the console. Since we can now log all of the data we can send all of the data to the frontend. Incidently we will not send back the whole object of user since we don't want to send our password so will only send email and name.
 
-<pre><code>// server.js
-app.get('/user', (req, res) =&gt; {
+```
+// server.js
+app.get('/user', (req, res) => {
   let token = req.headers.token;
-  jwt.verify(token, secretkey, (err, decoded) =&gt; {
+  jwt.verify(token, secretkey, (err, decoded) => {
     if(err) return res.status(401).json({
       title: 'unauthorised'
     })
-    User.findOne({ _id: decoded.userId }, ( err, user ) =&gt; {
+    User.findOne({ _id: decoded.userId }, ( err, user ) => {
       if (err) return console.log(err);
-      return res.status(200).json({ &lt;!--modified--&gt;
-        title: 'user grabbed', &lt;!--added--&gt;
-        user: {					&lt;!--addded--&gt;
+      return res.status(200).json({ <!--modified-->
+        title: 'user grabbed', <!--added-->
+        user: {                 <!--addded-->
           email: user.email,
           name: user.name
         }
@@ -742,26 +780,27 @@ app.get('/user', (req, res) =&gt; {
   })
 })
 
-</code></pre>
+```
 
-<p>This should now pop up on our console and we can then use that data to display to the user.</p>
+This should now pop up on our console and we can then use that data to display to the user.
 
-<pre><code>// home.vue
-&lt;template lang=&quot;html&quot;&gt;
-&lt;div&gt;
-  &lt;h2&gt;Home&lt;/h2&gt;
-  &lt;p&gt;Hello {{name}}&lt;/p&gt; &lt;!--added--&gt;
+```
+// home.vue
+<template lang="html">
+<div>
+  <h2>Home</h2>
+  <p>Hello {{name}}</p> <!--added-->
 
-  &lt;button @click=&quot;logout&quot;&gt;Logout&lt;/button&gt;
-&lt;/div&gt;
-&lt;/template&gt;
+  <button @click="logout">Logout</button>
+</div>
+</template>
 
-&lt;script&gt;
+<script>
 import axios from 'axios'
 
 export default {
   name:'home',
-  data(){		&lt;!--added--&gt;
+  data(){       <!--added-->
     return{
       name:'',
       email:''
@@ -777,7 +816,7 @@ export default {
       headers: {
         token: localStorage.getItem('token')
       }
-    }).then(res =&gt; {			&lt;!--modified--&gt;
+    }).then(res => {            <!--modified-->
       // console.log(res);
       this.name = res.data.user.name
       this.email = res.data.user.email
@@ -790,12 +829,12 @@ export default {
     }
   }
 }
-&lt;/script&gt;
+</script>
 
-&lt;style lang=&quot;css&quot; scoped&gt;
-&lt;/style&gt;
+<style lang="css" scoped>
+</style>
 
-</code></pre>
+<p>```</p>
 
 <h3 id="summary">Summary</h3>
 
