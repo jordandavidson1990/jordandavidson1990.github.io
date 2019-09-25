@@ -18,8 +18,7 @@
       
       <guid>https://jordandavidson1990.github.io/post/authenication/</guid>
       <description>Using Authenication with Vue and MongoDb Lesson Objectives  Know how to use axios, jsonwebtoken and mongoose Understand how to verify user Be able to make a basic authenication app.  Introduction We are going to try make basic authenication functionality using a Vue frontend and mongodb/express backend incorporating mongoose, axios, jsonwebtoken and bcrypt.
- Hand out start code
- // terminal server directory mongod npm install npm start  // terminal client directory npm install npm run serve  Visit localhost:3000 and you should see &amp;ldquo;hello world&amp;rdquo;.</description>
+ Start/end code is available to download https://github.com/jordandavidson1990/authenication Open the start code is your favourite editor.</description>
     </item>
     
   </channel>
